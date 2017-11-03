@@ -139,4 +139,4 @@ int waitPid(void){
                      printf(1,"\n if processes with highest priority finished first then its correct \n");
 }
 			
-	return 0;}
+	return ret_pid;} //changed from return 0 - krishna

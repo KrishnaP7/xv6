@@ -107,13 +107,12 @@ sys_waitpid(void)
   return waitpid(pid, status, option);
 }
 
-void sys_givePriority(void)
+void sys_setpriority(void)
 {
   int pid;
   int priority;
   argint(0, &pid);
   argint(1, &priority);
-  //return givePriority(pid, priority);
 }
 
 

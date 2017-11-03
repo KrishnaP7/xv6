@@ -21,4 +21,4 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_waitpid 22
-#define SYS_givePriority 23
+#define SYS_setpriority 23

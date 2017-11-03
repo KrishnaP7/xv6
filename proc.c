@@ -257,7 +257,7 @@ exit(int status)
 
   //**********************CHANGED PART***********************:
   curproc->exit = status;
-  cprintf("Status of the Exit: %d", status);
+  cprintf("Status of the Exit: %d \n", status);
   //**********************CHANGED PART***********************
 
   // Pass abandoned children to init.
@@ -294,6 +294,10 @@ wait(int *status)
       havekids = 1;
       if(p->state == ZOMBIE){
         // Found one.
+        if(status != 0)
+	{
+	   *status = p->exit;
+	}
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
@@ -306,11 +310,6 @@ wait(int *status)
         release(&ptable.lock);
         return pid;
       }
-    }
-
-    if(status != 0)
-    {
-        *status = p->exit;
     }
 
     // No point waiting if we don't have any children.
@@ -360,7 +359,7 @@ scheduler(void)
 	    highestPriority = p->priority;
 	}
     }
-
+    
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
 	if (p->state != RUNNABLE)
@@ -373,11 +372,12 @@ scheduler(void)
 	    switchuvm(p);
 	    p->state = RUNNING;
 	    swtch(&c->scheduler, p->context);
-	    switchkvm();
+	    break;
 
-	    c->proc = 0;
 	}
     }
+    switchkvm();
+    c->proc = 0;
 
 
     /*for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -599,6 +599,10 @@ int waitpid(int pid, int *status, int options)
 				havekids = 1;
 				if(p->state == ZOMBIE)
 				{
+					if(status != 0)
+					{
+						*status = p->exit;	
+					}
 					// Found one
 					pid = p->pid;
 					kfree(p->kstack);
@@ -611,12 +615,9 @@ int waitpid(int pid, int *status, int options)
 					p->state = UNUSED;
 					release(&ptable.lock);
 					return pid;
+					
 				}
 			}
-		}
-		if (status != 0)
-		{
-			*status = p->exit;
 		}
 
 		// No point waiting if we don't have any children
@@ -633,20 +634,10 @@ int waitpid(int pid, int *status, int options)
 
 
 void
-givePriority(int pid, int priority)
+setpriority(int p)
 {
-	struct proc *p;
-	
-	acquire(&ptable.lock);
-	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-	{
-		if (p->pid == pid)
-		{
-			p->priority = priority;
-			break;
-		}
-	}
-	release(&ptable.lock);
+	struct proc *curproc = myproc();
+	curproc->priority = p;
 }
 
 
